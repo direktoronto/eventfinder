@@ -267,13 +267,11 @@ const ErrorBoundary: React.FC<{ error: Error }> = ({ error }) => (
         padding: '8px 16px',
         background: '#c00',
         color: 'white',
-        { isFavorite, toggleFavorite, favorites } = useFavorites();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [sortBy, setSortBy] = useState<'date' | 'price' | 'name'>('date');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
-  const [maxPrice] = useState(200);
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        marginTop: '12px'
+      }}
     >
       Retry
     </button>
@@ -305,11 +303,13 @@ const LoadingSpinner: React.FC = () => (
 
 const Home: React.FC = () => {
   const { events, loading, error } = useProjects();
+  const { isFavorite, toggleFavorite, favorites } = useFavorites();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState<'date' | 'price' | 'name'>('date');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
   const [maxPrice] = useState(200);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   // Get unique categories
   const categories = ['All', ...Array.from(new Set(events.map(e => e.category)))];
@@ -320,10 +320,10 @@ const Home: React.FC = () => {
       const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            event.venue.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesFavorites = !showFavoritesOnly || isFavorite(event.id);
-      return matchesSearch && matchesCategory && matchesPrice && matchesFavoritesvent.category === selectedCategory;
+      const matchesCategory = selectedCategory === 'All' || event.category === selectedCategory;
       const matchesPrice = event.price >= priceRange[0] && event.price <= priceRange[1];
-      return matchesSearch && matchesCategory && matchesPrice;
+      const matchesFavorites = !showFavoritesOnly || isFavorite(event.id);
+      return matchesSearch && matchesCategory && matchesPrice && matchesFavorites;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -405,7 +405,8 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Category Filters */}, alignItems: 'center' }}>
+          {/* Category Filters */}
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px', alignItems: 'center' }}>
             {categories.map(category => (
               <button
                 key={category}
@@ -465,8 +466,7 @@ const Home: React.FC = () => {
               }}
             >
               {showFavoritesOnly ? '❤️ Favorites' : '🤍 Show Favorites'}
-            </button>/button>
-            ))}
+            </button>
           </div>
 
           {/* Sort and Filters Row */}
